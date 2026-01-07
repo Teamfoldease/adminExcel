@@ -1360,7 +1360,7 @@ def convert_shopify_to_excel_with_date_columns_fixed(df):
         
         # Start grouping from column 9 (column J) onwards - after base + separator
         start_col = 11 # Column J (after base columns A-H + separator I)
-        total_columns = len(all_columns)
+        total_columns = len(all_columns)+2
         
         # Group every 12 columns + 1 separator = 13 positions starting from column 9
         group_level = 1
@@ -1373,10 +1373,10 @@ def convert_shopify_to_excel_with_date_columns_fixed(df):
             # Find end of this group (12 data columns)
             data_cols_found = 0
             end_col = start_col
-            while end_col < total_columns and data_cols_found < 14:
+            while end_col < total_columns and data_cols_found < 12:
                 if not all_columns[end_col].startswith("SEPARATOR_"):
                     data_cols_found += 1
-                if data_cols_found < 14:
+                if data_cols_found < 12:
                     end_col += 1
                     
                     
@@ -1386,7 +1386,7 @@ def convert_shopify_to_excel_with_date_columns_fixed(df):
                 worksheet.set_column(
                     start_col, 
                     end_col - 1, 
-                    14, 
+                    12, 
                     None, 
                     {'level': group_level, 'collapsed': True, 'hidden':True}  # Start collapsed
                 )
