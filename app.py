@@ -1386,7 +1386,7 @@ def convert_shopify_to_excel_with_date_columns_fixed(df):
                 worksheet.set_column(
                     start_col, 
                     end_col - 1, 
-                    12, 
+                    14, 
                     None, 
                     {'level': group_level, 'collapsed': True, 'hidden':True}  # Start collapsed
                 )
