@@ -1359,8 +1359,8 @@ def convert_shopify_to_excel_with_date_columns_fixed(df):
         # Separator column after base is column 8 - NO GROUPING
         
         # Start grouping from column 9 (column J) onwards - after base + separator
-        start_col = 11 # Column J (after base columns A-H + separator I)
-        total_columns = len(all_columns)+2
+        start_col = 9 # Column J (after base columns A-H + separator I)
+        total_columns = len(all_columns)
         
         # Group every 12 columns + 1 separator = 13 positions starting from column 9
         group_level = 1
