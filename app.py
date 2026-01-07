@@ -1359,7 +1359,7 @@ def convert_shopify_to_excel_with_date_columns_fixed(df):
         # Separator column after base is column 8 - NO GROUPING
         
         # Start grouping from column 9 (column J) onwards - after base + separator
-        start_col = 9  # Column J (after base columns A-H + separator I)
+        start_col = 11 # Column J (after base columns A-H + separator I)
         total_columns = len(all_columns)
         
         # Group every 12 columns + 1 separator = 13 positions starting from column 9
@@ -1400,7 +1400,9 @@ def convert_shopify_to_excel_with_date_columns_fixed(df):
         worksheet.set_column(5, 5, 18)  # Total Ad Spent
         worksheet.set_column(6, 6, 15)  # CPI
         worksheet.set_column(7, 7, 15)  # BE
-        worksheet.set_column(8, 8, 3)   # Separator column after base - narrow width
+        worksheet.set_column(8, 8, 15)
+        worksheet.set_column(9, 9, 15)# Separator column after base - narrow width
+        worksheet.set_column(10, 10, 15)
 
         # Configure outline settings for better user experience
         worksheet.outline_settings(
