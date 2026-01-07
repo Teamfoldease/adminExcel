@@ -2485,7 +2485,7 @@ def convert_final_campaign_to_excel_with_date_columns_fixed(df, shopify_df=None,
                 selected_days = 1
         
         # Define base columns - CHANGED: Cost Per Purchase to CPP, Amount Spent (Zero Net Profit %) to BE
-        base_columns = ["Product Name", "Campaign Name", "Total Amount Spent (USD)", "Total Purchases", "CPP", "BE"]
+        base_columns = ["Product Name", "Campaign Name", "Total Amount Spent (USD)", "Total Purchases", "CPP", "BE", "Last Date Amount Spent (USD)", "Total Net Profit %"]
         
         # Define metrics that will be repeated for each date (13 metrics = 13 columns per date)
         date_metrics = ["Delivery status","Avg Price", "Delivery Rate", "Product Cost Input", "Amount Spent (USD)", "Purchases", "Cost Per Purchase (USD)", 
@@ -2647,7 +2647,9 @@ def convert_final_campaign_to_excel_with_date_columns_fixed(df, shopify_df=None,
         worksheet.set_column(3, 3, 15)  # Total Purchases
         worksheet.set_column(4, 4, 18)  # CPP
         worksheet.set_column(5, 5, 25)  # BE
-        worksheet.set_column(6, 6, 3)   # Separator column
+        worksheet.set_column(6, 6, 25)  # Last Date Amount Spent (USD)
+        worksheet.set_column(7, 7, 20)  # Total Net Profit %
+        worksheet.set_column(8, 8, 3)   # Separator column after base
         # Set width for remark column
         remark_col_idx = all_columns.index("Remark")
         worksheet.set_column(remark_col_idx, remark_col_idx, 30)  # Remark column
@@ -2779,7 +2781,9 @@ def convert_final_campaign_to_excel_with_date_columns_fixed(df, shopify_df=None,
                 safe_write(worksheet, campaign_row_idx, 3, "", campaign_format)
                 safe_write(worksheet, campaign_row_idx, 4, "", campaign_format)
                 safe_write(worksheet, campaign_row_idx, 5, "", campaign_format)  # BE will reference product total
-                
+                # Leave Last Date Amount Spent and Total Net Profit % empty for now (will be filled via formulas)
+                safe_write(worksheet, campaign_row_idx, 6, "", campaign_format)  # Last Date Amount Spent
+                safe_write(worksheet, campaign_row_idx, 7, "", campaign_format)  # Total Net Profit %
                 # Add remark for campaigns with total amount spent USD = 0
                 total_amount_spent_usd = campaign_group.get("Amount Spent (USD)", 0).sum() if "Amount Spent (USD)" in campaign_group.columns else 0
                 if total_amount_spent_usd == 0:
@@ -3051,7 +3055,25 @@ def convert_final_campaign_to_excel_with_date_columns_fixed(df, shopify_df=None,
                 
                 # BE - CHANGED: Reference the product total BE value instead of calculating individually
                 # This will be filled after product total BE is calculated
+                # Last Date Amount Spent (USD) - column 6
+                last_date = unique_dates[-1] if unique_dates else None
+                if last_date:
+                    last_date_amount_col_idx = all_columns.index(f"{last_date}_Amount Spent (USD)")
+                    worksheet.write_formula(
+                        campaign_row_idx, 6,
+                        f"={xl_col_to_name(last_date_amount_col_idx)}{excel_row}",
+                        campaign_format
+                    )
+                else:
+                    safe_write(worksheet, campaign_row_idx, 6, 0, campaign_format)
                 
+                # Total Net Profit % - column 7
+                total_net_profit_pct_col_idx = all_columns.index("Total_Net Profit (%)")
+                worksheet.write_formula(
+                    campaign_row_idx, 7,
+                    f"={xl_col_to_name(total_net_profit_pct_col_idx)}{excel_row}",
+                    campaign_format
+                )
                 row += 1
             
             # Calculate product totals by aggregating campaign rows using RANGES
@@ -3102,6 +3124,27 @@ def convert_final_campaign_to_excel_with_date_columns_fixed(df, shopify_df=None,
                 worksheet.write_formula(
                     product_total_row_idx, 5,
                     zero_net_profit_formula,
+                    product_total_format
+                )
+                # ===== ADD THIS NEW CODE AFTER BE (COLUMN 5) =====
+                
+                # Last Date Amount Spent for product total - column 6
+                last_date = unique_dates[-1] if unique_dates else None
+                if last_date:
+                    last_date_amount_col_idx = all_columns.index(f"{last_date}_Amount Spent (USD)")
+                    worksheet.write_formula(
+                        product_total_row_idx, 6,
+                        f"={xl_col_to_name(last_date_amount_col_idx)}{product_total_row_idx+1}",
+                        product_total_format
+                    )
+                else:
+                    safe_write(worksheet, product_total_row_idx, 6, 0, product_total_format)
+                
+                # Total Net Profit % for product total - column 7
+                total_net_profit_pct_col_idx = all_columns.index("Total_Net Profit (%)")
+                worksheet.write_formula(
+                    product_total_row_idx, 7,
+                    f"={xl_col_to_name(total_net_profit_pct_col_idx)}{product_total_row_idx+1}",
                     product_total_format
                 )
                 
@@ -3370,7 +3413,25 @@ def convert_final_campaign_to_excel_with_date_columns_fixed(df, shopify_df=None,
                 zero_net_profit_formula,
                 grand_total_format
             )
+            # Last Date Amount Spent for grand total - column 6
+            last_date = unique_dates[-1] if unique_dates else None
+            if last_date:
+                last_date_amount_col_idx = all_columns.index(f"{last_date}_Amount Spent (USD)")
+                worksheet.write_formula(
+                    grand_total_row_idx, 6,
+                    f"={xl_col_to_name(last_date_amount_col_idx)}{grand_total_row_idx+1}",
+                    grand_total_format
+                )
+            else:
+                safe_write(worksheet, grand_total_row_idx, 6, 0, grand_total_format)
             
+            # Total Net Profit % for grand total - column 7
+            total_net_profit_pct_col_idx = all_columns.index("Total_Net Profit (%)")
+            worksheet.write_formula(
+                grand_total_row_idx, 7,
+                f"={xl_col_to_name(total_net_profit_pct_col_idx)}{grand_total_row_idx+1}",
+                grand_total_format
+            )
             # Add remark for grand total if total amount spent USD = 0 (using filtered data for valid products only)
             grand_total_amount_spent = sum([product_df["Amount Spent (USD)"].sum() for _, product_df in valid_products])
             if grand_total_amount_spent == 0:
@@ -6081,7 +6142,6 @@ if campaign_files or shopify_files or old_merged_files:
         unique_dates = df_shopify['Date'].unique()
         unique_dates = [str(d) for d in unique_dates if pd.notna(d) and str(d).strip() != '']
         st.info(f"📅 Found {len(unique_dates)} unique dates: {', '.join(sorted(unique_dates)[:5])}{'...' if len(unique_dates) > 5 else ''}")
-
 
 
 
