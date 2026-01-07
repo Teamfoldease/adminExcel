@@ -1395,14 +1395,16 @@ def convert_shopify_to_excel_with_date_columns_fixed(df):
             start_col = end_col + 1  # +1 to skip separator after this group
         
         # Set base column widths (always visible, NO GROUPING)
-        worksheet.set_column(0, 1, 25)  # Product title and variant title
-        worksheet.set_column(2, 4, 15)  # Base delivery rate, product cost, net items sold
-        worksheet.set_column(5, 5, 18)  # Total Ad Spent
-        worksheet.set_column(6, 6, 15)  # CPI
-        worksheet.set_column(7, 7, 15)  # BE
-        worksheet.set_column(8, 8, 15)
-        worksheet.set_column(9, 9, 15)# Separator column after base - narrow width
-        worksheet.set_column(10, 10, 15)
+        # Set base column widths (always visible, NO GROUPING)
+        worksheet.set_column(0, 0, 25)  # Product Name
+        worksheet.set_column(1, 1, 30)  # Campaign Name
+        worksheet.set_column(2, 2, 20)  # Total Amount Spent (USD)
+        worksheet.set_column(3, 3, 15)  # Total Purchases
+        worksheet.set_column(4, 4, 18)  # CPP
+        worksheet.set_column(5, 5, 25)  # BE
+        worksheet.set_column(6, 6, 25)  # Last Date Amount Spent (USD)
+        worksheet.set_column(7, 7, 20)  # Total Net Profit %
+        worksheet.set_column(8, 8, 2)   # Separator column after base columns - visible separator
 
         # Configure outline settings for better user experience
         worksheet.outline_settings(
