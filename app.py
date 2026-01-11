@@ -2658,10 +2658,10 @@ def convert_final_campaign_to_excel_with_date_columns_fixed(df, shopify_df=None,
                 
             data_cols_found = 0
             end_col = start_col
-            while end_col < total_columns and data_cols_found < 16:
+            while end_col < total_columns and data_cols_found < 14:
                 if not all_columns[end_col].startswith("SEPARATOR_"):
                     data_cols_found += 1
-                if data_cols_found < 16:
+                if data_cols_found < 14:
                     end_col += 1
             
             if end_col < total_columns:
